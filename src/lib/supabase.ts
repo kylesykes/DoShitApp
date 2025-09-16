@@ -49,6 +49,7 @@ export type Database = {
           category: string | null
           difficulty: number | null
           is_completed: boolean
+          archived_at: string | null
           created_at: string
           updated_at: string
         }
@@ -62,6 +63,7 @@ export type Database = {
           category?: string | null
           difficulty?: number | null
           is_completed?: boolean
+          archived_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -75,6 +77,7 @@ export type Database = {
           category?: string | null
           difficulty?: number | null
           is_completed?: boolean
+          archived_at?: string | null
           created_at?: string
           updated_at?: string
         }

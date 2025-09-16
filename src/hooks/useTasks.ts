@@ -20,6 +20,7 @@ export const useTasks = () => {
       .from('tasks')
       .select('*')
       .eq('user_id', user.id)
+      .is('archived_at', null)  // Only get non-archived tasks
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -95,6 +96,28 @@ export const useTasks = () => {
     return availableTasks[randomIndex]
   }
 
+  const archiveTask = async (id: string): Promise<{ data: Task | null; error: any }> => {
+    if (!user) return { data: null, error: 'User not authenticated' }
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .update({
+        archived_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('user_id', user.id)
+      .select()
+      .single()
+
+    if (!error && data) {
+      // Remove from local state since we only show non-archived tasks
+      setTasks(prev => prev.filter(task => task.id !== id))
+    }
+
+    return { data, error }
+  }
+
   useEffect(() => {
     fetchTasks()
   }, [user])
@@ -105,6 +128,7 @@ export const useTasks = () => {
     createTask,
     updateTask,
     deleteTask,
+    archiveTask,
     getTasksByTimeBucket,
     getRandomTask,
     refetch: fetchTasks

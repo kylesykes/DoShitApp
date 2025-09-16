@@ -2,11 +2,15 @@ import React, { useState } from 'react'
 import { useTasks } from '../hooks/useTasks'
 import { TaskForm } from '../components/Tasks/TaskForm'
 import { TaskCard } from '../components/Tasks/TaskCard'
+import { Timer } from '../components/Timer/Timer'
+import { Celebration } from '../components/Celebration/Celebration'
 
 export const Dashboard: React.FC = () => {
-  const { tasks, loading, createTask, updateTask, deleteTask, getTasksByTimeBucket, getRandomTask } = useTasks()
+  const { tasks, loading, createTask, updateTask, deleteTask, archiveTask, getTasksByTimeBucket, getRandomTask } = useTasks()
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [createLoading, setCreateLoading] = useState(false)
+  const [activeTask, setActiveTask] = useState<any>(null)
+  const [celebratingTask, setCelebratingTask] = useState<any>(null)
 
   const handleCreateTask = async (taskData: {
     title: string
@@ -24,12 +28,13 @@ export const Dashboard: React.FC = () => {
   }
 
   const handleStartTask = (task: any) => {
-    // TODO: Implement timer functionality
-    console.log('Starting task:', task.title)
+    setActiveTask(task)
   }
 
   const handleCompleteTask = async (task: any) => {
     await updateTask(task.id, { is_completed: true })
+    // Show celebration for completed task
+    setCelebratingTask(task)
   }
 
   const handleDeleteTask = async (taskId: string) => {
@@ -43,6 +48,41 @@ export const Dashboard: React.FC = () => {
     if (randomTask) {
       handleStartTask(randomTask)
     }
+  }
+
+  const handleTimerComplete = async () => {
+    if (activeTask) {
+      await updateTask(activeTask.id, { is_completed: true })
+      // Show celebration for timer completion
+      setCelebratingTask(activeTask)
+      setActiveTask(null)
+    }
+  }
+
+  const handleTimerCancel = () => {
+    setActiveTask(null)
+  }
+
+  const handleArchiveTask = async (taskId: string) => {
+    if (confirm('Archive this task? It will be removed from your active list.')) {
+      await archiveTask(taskId)
+    }
+  }
+
+  const handleSkipAndPickAnother = () => {
+    // Get available tasks excluding the current one
+    const availableTasks = incompleteTasks.filter(task => task.id !== activeTask?.id)
+
+    if (availableTasks.length === 0) {
+      // No other tasks available
+      alert("No other tasks available to pick from!")
+      return
+    }
+
+    // Pick a random task from the remaining ones
+    const randomIndex = Math.floor(Math.random() * availableTasks.length)
+    const newTask = availableTasks[randomIndex]
+    setActiveTask(newTask)
   }
 
   const incompleteTasks = tasks.filter(task => !task.is_completed)
@@ -168,6 +208,7 @@ export const Dashboard: React.FC = () => {
                     onStart={handleStartTask}
                     onComplete={handleCompleteTask}
                     onDelete={handleDeleteTask}
+                    onArchive={handleArchiveTask}
                     showActions={false}
                   />
                 ))}
@@ -188,6 +229,24 @@ export const Dashboard: React.FC = () => {
           onSubmit={handleCreateTask}
           onCancel={() => setShowTaskForm(false)}
           loading={createLoading}
+        />
+      )}
+
+      {/* Timer Modal */}
+      {activeTask && (
+        <Timer
+          task={activeTask}
+          onComplete={handleTimerComplete}
+          onCancel={handleTimerCancel}
+          onSkipAndPickAnother={incompleteTasks.length > 1 ? handleSkipAndPickAnother : undefined}
+        />
+      )}
+
+      {/* Celebration Modal */}
+      {celebratingTask && (
+        <Celebration
+          task={celebratingTask}
+          onClose={() => setCelebratingTask(null)}
         />
       )}
     </div>

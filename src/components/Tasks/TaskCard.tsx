@@ -15,6 +15,7 @@ interface TaskCardProps {
   onStart: (task: Task) => void
   onComplete: (task: Task) => void
   onDelete: (taskId: string) => void
+  onArchive?: (taskId: string) => void
   showActions?: boolean
 }
 
@@ -23,6 +24,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({
   onStart,
   onComplete,
   onDelete,
+  onArchive,
   showActions = true
 }) => {
   const getTimeBucketDisplay = (bucket: 'S' | 'M' | 'L') => {
@@ -84,7 +86,17 @@ export const TaskCard: React.FC<TaskCardProps> = ({
         )}
 
         {task.is_completed && (
-          <span className="text-green-600 text-sm font-medium">✓ Completed</span>
+          <div className="flex items-center justify-between">
+            <span className="text-green-600 text-sm font-medium">✓ Completed</span>
+            {onArchive && (
+              <button
+                onClick={() => onArchive(task.id)}
+                className="bg-gray-500 text-white px-2 py-1 rounded text-xs hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              >
+                Archive
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
