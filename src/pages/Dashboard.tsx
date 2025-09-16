@@ -6,7 +6,7 @@ import { Timer } from '../components/Timer/Timer'
 import { Celebration } from '../components/Celebration/Celebration'
 
 export const Dashboard: React.FC = () => {
-  const { tasks, loading, createTask, updateTask, deleteTask, archiveTask, getTasksByTimeBucket, getRandomTask } = useTasks()
+  const { tasks, loading, createTask, updateTask, deleteTask, archiveTask, getRandomTask } = useTasks()
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [createLoading, setCreateLoading] = useState(false)
   const [activeTask, setActiveTask] = useState<any>(null)
